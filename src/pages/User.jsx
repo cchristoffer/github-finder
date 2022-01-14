@@ -1,26 +1,25 @@
-import {
-  FaCodepen,
-  FaStore,
-  FaUser,
-  FaUserFriends,
-  FaUsers,
-} from 'react-icons/fa'
+import { FaCodepen, FaStore, FaUserFriends, FaUsers } from 'react-icons/fa'
 import { useEffect, useContext } from 'react'
 import { Link } from 'react-router-dom'
 import GithubContext from '../context/github/GithubContex'
 import { useParams } from 'react-router-dom'
 import Spinner from '../components/layout/Spinner'
 import ReposList from '../components/repos/ReposList'
+import { getUserAndRepos } from '../context/github/GithubActions'
 
-function User({}) {
-  const { getUser, user, loading, getUserRepos, repos } = useContext(GithubContext)
+function User() {
+  const { user, loading, repos, dispatch } = useContext(GithubContext)
 
   const params = useParams()
 
   useEffect(() => {
-    getUser(params.login)
-    getUserRepos(params.login)
-  }, [])
+    dispatch({ type: 'SET_LOADING' })
+    const getUserData = async () => {
+      const userData = await getUserAndRepos(params.login)
+      dispatch({ type: 'GET_USER_AND_REPOS', payload: userData })
+    }
+    getUserData()
+  }, [dispatch, params.login])
 
   const {
     name,
@@ -55,7 +54,7 @@ function User({}) {
           <div className='custom-card-image mb-6 md:mb-0'>
             <div className='rounded-lg shadow-xl card image-full'>
               <figure>
-                <img src={avatar_url} alt='Avatar image' />
+                <img src={avatar_url} alt='' />
               </figure>
               <div className='card-body justify-end'>
                 <h2 className='card-title mb-0'>{name}</h2>
@@ -158,7 +157,7 @@ function User({}) {
             </div>
           </div>
         </div>
-        <ReposList repos={repos}/>
+        <ReposList repos={repos} />
       </div>
     </>
   )
